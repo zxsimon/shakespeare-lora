@@ -2,3 +2,4 @@
 *.json
 play.py
 .DS_Store
+__pycache__/

@@ -59,7 +59,7 @@ def generate_completion(prompt):
     )
     return response.choices[0].message.content
 
-def append_to_training_data(prompt, answer, fp_suffix=""):
+def append_to_json(prompt, answer, split, fp_suffix=""):
 
     training_example = {
         "messages": [
@@ -69,12 +69,12 @@ def append_to_training_data(prompt, answer, fp_suffix=""):
     }
     
     # Append to JSONL file
-    with open(f"shakespeare_training_{fp_suffix}.jsonl", 'a', encoding='utf-8') as f:
+    with open(f"shakespeare_{split}_{fp_suffix}.jsonl", 'a', encoding='utf-8') as f:
         f.write(json.dumps(training_example, ensure_ascii=False) + '\n')
     
     return training_example
 
-def transform_ultrafeedback(num_examples, print_compare = False, create_json = False):
+def transform_ultrafeedback(num_examples, split, print_compare = False, create_json = False):
     ds = load_dataset("HuggingFaceH4/ultrafeedback_binarized")
     ds_sample = ds["train_sft"].select(range(num_examples))
     examples = [row['chosen'] for row in ds_sample]
@@ -84,6 +84,8 @@ def transform_ultrafeedback(num_examples, print_compare = False, create_json = F
         transformed_prompt = shakespearean_prompt(orig_prompt, orig_answer)
         transformed_answer = generate_completion(transformed_prompt)
         if print_compare:
+            print("Original prompt:")
+            print(orig_prompt)
             print("Original answer:")
             print(orig_answer)
             print("-"*100)
@@ -91,9 +93,9 @@ def transform_ultrafeedback(num_examples, print_compare = False, create_json = F
             print(transformed_answer)
             print("-"*100)
         if create_json:
-            append_to_training_data(orig_prompt, transformed_answer, "ultrafeedback")
+            append_to_json(orig_prompt, transformed_answer, split, fp_suffix = "ultrafeedback")
 
-def transform_alpaca(num_examples, print_compare = False, create_json = False):
+def transform_alpaca(num_examples, split, print_compare = False, create_json = False):
     ds = load_dataset("tatsu-lab/alpaca")
     ds_sample = ds["train"].select(range(num_examples))
     for example in tqdm(ds_sample, total=len(ds_sample), desc="Generating Shakespearean training data"):
@@ -111,19 +113,20 @@ def transform_alpaca(num_examples, print_compare = False, create_json = False):
             print(transformed_answer)
             print("-"*100)
         if create_json:
-            append_to_training_data(orig_prompt, transformed_answer, "alpaca")
+            append_to_json(orig_prompt, transformed_answer, split, fp_suffix = "alpaca")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset_name", type=str, choices=["ultrafeedback", "alpaca"])
 parser.add_argument("--num_examples", type=int, default=10000)
 parser.add_argument("--print_compare", type=bool, default=False)
 parser.add_argument("--create_json", type=bool, default=False)
+parser.add_argument("--split", type=str, choices=["train", "val", "test"])
 args = parser.parse_args()
 
 if __name__ == "__main__":
     if args.dataset_name == "ultrafeedback":
-        transform_ultrafeedback(num_examples=args.num_examples, print_compare=args.print_compare, create_json=args.create_json)
+        transform_ultrafeedback(num_examples=args.num_examples, split=args.split, print_compare=args.print_compare, create_json=args.create_json)
     elif args.dataset_name == "alpaca":
-        transform_alpaca(num_examples=args.num_examples, print_compare=args.print_compare, create_json=args.create_json)
+        transform_alpaca(num_examples=args.num_examples, split=args.split, print_compare=args.print_compare, create_json=args.create_json)
     else:
         raise ValueError(f"Dataset {args.dataset_name} not supported")

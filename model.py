@@ -8,52 +8,63 @@ import code
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
 
-model_name = "Qwen/Qwen3-8B"
-model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model.to(device)
+default_model_name = "Qwen/Qwen3-0.6B"
 
-lora_config = LoraConfig(
-    r=16,
-    lora_alpha=32,
-    target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
-    bias="none",
-)
+tokenizer = AutoTokenizer.from_pretrained(default_model_name)
+think_end_token_id = tokenizer.encode("</think>")[0]
+im_start_token_id = tokenizer.encode("<|im_start|>")[0]
+pad_token_id = tokenizer.pad_token_id
 
-# prepare the model input
-prompt = "Give me a short introduction to large language model."
-messages = [
-    {"role": "user", "content": prompt}
-]
-text = tokenizer.apply_chat_template(
-    messages,
-    tokenize=False,
-    add_generation_prompt=True,
-    enable_thinking=True # Switches between thinking and non-thinking modes. Default is True.
-)
-model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+def get_model(model = default_model_name, lora = True, r = 16, lora_alpha = 32, target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]):
+    lora_config = LoraConfig(
+                        r=r,
+                        lora_alpha=lora_alpha,  
+                        target_modules=target_modules,
+                        bias="none",
+                    )
+    model = AutoModelForCausalLM.from_pretrained(default_model_name, dtype=torch.bfloat16)
+    if lora:
+        model = get_peft_model(model, lora_config)
+    model.to(device)
+    return model
 
-# conduct text completion
-generated_ids = model.generate(
-    **model_inputs,
-    max_new_tokens=1000
-)
-output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
+def test_generation(model, prompt = None, max_new_tokens=1000, show_thinking=True, format_output = False):
+    
+    if prompt is None:
+        prompt = "Give me a short introduction to large language model."
+    messages = [
+        {"role": "user", "content": prompt}
+    ]
+    
+    inputs = tokenizer.apply_chat_template(
+        messages,
+        add_generation_prompt=True,
+        return_tensors="pt",
+        return_dict=True
+    ).to(model.device)
 
-# parsing thinking content
-try:
-    # rindex finding 151668 (</think>)
-    index = len(output_ids) - output_ids[::-1].index(151668)
-except ValueError:
-    index = 0
+    out_ids = model.generate(
+        **inputs,
+        max_new_tokens=max_new_tokens
+    )[0]
 
-thinking_content = tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
-content = tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
 
-print(thinking_content)
-print(content)
+    if not format_output:
+        output = tokenizer.decode(out_ids, skip_special_tokens=False)
+        return(output)
+    else:
+        gen_ids = out_ids[inputs['input_ids'].shape[1]:]
+        try:
+            think_id_idx = torch.argmax(gen_ids == think_end_token_id).item()
+        except ValueError:
+            think_id_idx = 0
+        think_ids = gen_ids[:think_id_idx+1]
+        output_ids = gen_ids[think_id_idx+1:]
+        if show_thinking:
+            print(tokenizer.decode(think_ids, skip_special_tokens=True).strip("\n"))
+        print(tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n"))
 
-model = get_peft_model(model, lora_config)
-model.print_trainable_parameters()
-
-code.interact(local=locals())
+if __name__ == "__main__":
+    model = get_model(lora=True, r=16, lora_alpha=32, target_modules=["q_proj", "k_proj", "v_proj", "o_proj"])
+    out = test_generation(model)
+    code.interact(local=dict(globals(), **locals()))

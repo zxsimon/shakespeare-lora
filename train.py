@@ -18,6 +18,8 @@ mini_batch_size = 4
 batch_size = 8
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 lr = 2e-4
+run_name = "test-run"
+project_name = "shakespeare-lora"
 
 # ---- Tokenizer ----
 
@@ -104,7 +106,7 @@ if num_iters > max_train_iters:
     num_iters = max_train_iters
     print(f"num_iters is greater than max_train_iters, setting num_iters to {num_iters}")
 
-logger = Logger("shakespeare-lora", run_name="test-run")
+logger = Logger(project_name, run_name)
 logger.log_config({
     "model": model_name,
     "dataset": dataset_name,

@@ -1,9 +1,11 @@
 from datasets import load_dataset, Dataset
 import code
-from openai import OpenAI
+from utils import generate_completion
 import json
 from tqdm import tqdm
 import argparse
+
+# We use Qwen3-30B-A3B-Instruct-2507, which is a non-thinking model
 
 def shakespearean_prompt(prompt, answer):
     model_prompt = f"""Transform ONLY THE ANSWER into Shakespearean style. DO NOT modify the original prompt.
@@ -49,16 +51,6 @@ def shakespearean_prompt(prompt, answer):
     return model_prompt
 
 
-def generate_completion(prompt):
-    client = OpenAI(base_url="http://127.0.0.1:1234/v1", api_key="not-needed")
-    response = client.chat.completions.create(
-        model="local-model",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.0,
-        max_tokens=1000,
-    )
-    return response.choices[0].message.content
-
 def append_to_json(prompt, answer, split, fp_suffix=""):
 
     training_example = {
@@ -68,11 +60,21 @@ def append_to_json(prompt, answer, split, fp_suffix=""):
         ]
     }
     
-    # Append to JSONL file
     with open(f"shakespeare_{split}_{fp_suffix}.jsonl", 'a', encoding='utf-8') as f:
         f.write(json.dumps(training_example, ensure_ascii=False) + '\n')
     
     return training_example
+
+def print_comparison(orig_prompt, orig_answer, transformed_answer):
+    print("Original prompt:")
+    print("-"*100)
+    print(orig_prompt)
+    print("Original answer:")
+    print(orig_answer)
+    print("-"*100)
+    print("Transformed answer:")
+    print(transformed_answer)
+    print("#"*100)
 
 def transform_ultrafeedback(num_examples, split, print_compare = False, create_json = False):
     ds = load_dataset("HuggingFaceH4/ultrafeedback_binarized")
@@ -84,17 +86,11 @@ def transform_ultrafeedback(num_examples, split, print_compare = False, create_j
         transformed_prompt = shakespearean_prompt(orig_prompt, orig_answer)
         transformed_answer = generate_completion(transformed_prompt)
         if print_compare:
-            print("Original prompt:")
-            print(orig_prompt)
-            print("Original answer:")
-            print(orig_answer)
-            print("-"*100)
-            print("Transformed answer:")
-            print(transformed_answer)
-            print("-"*100)
+            print_comparison(orig_prompt, orig_answer, transformed_answer)
         if create_json:
             append_to_json(orig_prompt, transformed_answer, split, fp_suffix = "ultrafeedback")
 
+# Slightly different structure for Alpaca dataset
 def transform_alpaca(num_examples, split, print_compare = False, create_json = False):
     ds = load_dataset("tatsu-lab/alpaca")
     ds_sample = ds["train"].select(range(num_examples))
@@ -104,19 +100,12 @@ def transform_alpaca(num_examples, split, print_compare = False, create_json = F
         transformed_prompt = shakespearean_prompt(orig_prompt, orig_answer)
         transformed_answer = generate_completion(transformed_prompt)
         if print_compare:
-            print("Original prompt:")
-            print(orig_prompt)
-            print("Original answer:")
-            print(orig_answer)
-            print("-"*100)
-            print("Transformed answer:")
-            print(transformed_answer)
-            print("-"*100)
+            print_comparison(orig_prompt, orig_answer, transformed_answer)
         if create_json:
             append_to_json(orig_prompt, transformed_answer, split, fp_suffix = "alpaca")
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--dataset_name", type=str, choices=["ultrafeedback", "alpaca"])
+parser.add_argument("--dataset_name", type=str, choices=["ultrafeedback", "alpaca"], default="ultrafeedback")
 parser.add_argument("--num_examples", type=int, default=10000)
 parser.add_argument("--print_compare", type=bool, default=False)
 parser.add_argument("--create_json", type=bool, default=False)

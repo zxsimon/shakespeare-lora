@@ -4,7 +4,7 @@ import torch
 from tqdm import tqdm
 
 
-def generate_mmlu(split="test", max_examples=1000):
+def generator_mmlu(split="test", max_examples=1000):
     """Generator for MMLU dataset. Chat template is applied to the prompt to encourage immediate categorical output."""
 
     mmlu = datasets.load_dataset("cais/mmlu", "all")
@@ -15,7 +15,7 @@ def generate_mmlu(split="test", max_examples=1000):
         choices = doc["choices"]
         prompt = f"<|im_start|>user\nAnswer the following question:\n{question}\n"
         prompt += "".join(f"-{choice}={character}\n" for choice, character in zip(choices, "ABCD"))
-        prompt += "Output ONLY and IMMEDIATELY the SINGLE letter corresponding to the correct answer. No other text or prefix.\n"
+        prompt += "Output ONLY and IMMEDIATELY the SINGLE letter corresponding to the correct answer. No other text or prefix.<|im_end|>\n"
         prompt += "<|im_start|>assistant<think>\n\n</think>\n\n"
 
         yield prompt, doc["answer"]
@@ -25,7 +25,7 @@ def evaluate_mmlu(model, tokenizer, generator = None, batch_size = 4, total_exam
     """Evaluate the model on the MMLU dataset."""
 
     if generator is None:
-        generator = generate_mmlu(max_examples=total_examples)
+        generator = generator_mmlu(max_examples=total_examples)
 
     answer_set = ["A", "B", "C", "D"]
     answer_token_ids = tokenizer(answer_set, return_tensors="pt")["input_ids"].squeeze() # 4
@@ -67,8 +67,7 @@ def evaluate_mmlu(model, tokenizer, generator = None, batch_size = 4, total_exam
     return total_correct / total_evaluated
 
 if __name__ == "__main__":
-    
-    # Tests the MMLU evaluation function
+    # Testing
     from transformers import AutoTokenizer, AutoModelForCausalLM
     model_name = "Qwen/Qwen3-8B"
     model = AutoModelForCausalLM.from_pretrained(model_name, dtype=torch.bfloat16)

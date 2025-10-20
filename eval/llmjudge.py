@@ -132,7 +132,7 @@ def judge_prompt(original_query, model_response):
     return prompt
 
 
-def evaluate_conversations(conversations, logger = None):
+def llmjudge_conversations(conversations, logger = None):
     """Evaluate a list of conversations with LLM-as-a-judge."""
     
     # Start vLLM server if CUDA is available. Otherwise, set up LMStudio manually.
@@ -184,4 +184,4 @@ if __name__ == "__main__":
     
     logger = Logger("shakespeare-lora", run_name="llmjudge-test")
     conversations = generate_smoltalk(model, tokenizer, num_examples = 4, batch_size = 2)
-    print(evaluate_conversations(conversations, logger=logger))
+    print(llmjudge_conversations(conversations, logger=logger))

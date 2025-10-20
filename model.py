@@ -15,7 +15,7 @@ think_end_token_id = tokenizer.encode("</think>")[0]
 im_start_token_id = tokenizer.encode("<|im_start|>")[0]
 pad_token_id = tokenizer.pad_token_id
 
-def get_model(model = default_model_name, lora = True, r = 16, lora_alpha = 32, target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]):
+def get_lora_model(model = default_model_name, lora = True, r = 16, lora_alpha = 32, target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]):
     lora_config = LoraConfig(
                         r=r,
                         lora_alpha=lora_alpha,  
@@ -65,6 +65,6 @@ def test_generation(model, prompt = None, max_new_tokens=1000, show_thinking=Tru
         print(tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n"))
 
 if __name__ == "__main__":
-    model = get_model(lora=True, r=16, lora_alpha=32, target_modules=["q_proj", "k_proj", "v_proj", "o_proj"])
+    model = get_lora_model(lora=True, r=16, lora_alpha=32, target_modules=["q_proj", "k_proj", "v_proj", "o_proj"])
     out = test_generation(model)
     code.interact(local=dict(globals(), **locals()))

@@ -13,7 +13,8 @@ def smoltalk_prompt_generator(split="test", num_examples=1000):
         prompt = doc['messages'][0]['content']
         yield prompt
 
-def generate_smoltalk(model, tokenizer, num_examples = 100, batch_size = 4, generator = None):
+@torch.no_grad()
+def generate_smoltalk(model, tokenizer, batch_size = 4, num_examples = 100, generator = None, max_new_tokens = 1000):
 
     """Generate responses for smoltalk."""
 
@@ -35,7 +36,7 @@ def generate_smoltalk(model, tokenizer, num_examples = 100, batch_size = 4, gene
         tokenized_prompts = tokenizer(templatized_prompts, return_tensors="pt", padding=True, padding_side="left").to(model.device)
 
         input_ids, attention_mask = tokenized_prompts["input_ids"], tokenized_prompts["attention_mask"]
-        generated_ids = model.generate(input_ids, attention_mask=attention_mask, max_new_tokens=1000)
+        generated_ids = model.generate(input_ids, attention_mask=attention_mask, max_new_tokens=max_new_tokens)
         new_tokens = generated_ids[:, input_ids.shape[1]:]
         generated_text = tokenizer.batch_decode(new_tokens, skip_special_tokens=True)
 

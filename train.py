@@ -36,7 +36,7 @@ model_checkpoint_interval = 1000
 mmlu_batch_size = 4
 mmlu_examples = 80
 smoltalk_batch_size = 4
-enable_llmjudge = True
+enable_llmjudge = False
 llmjudge_examples = 20
 test_examples = 40
 generate_examples = 4
@@ -137,7 +137,7 @@ GREEN = "\033[92m"
 RESET = "\033[0m"
 
 logger = Logger(project_name, run_name)
-logger.log_config({
+logger.log("config", {
     "model": model_name,
     "dataset": dataset_name,
     "epochs": epochs,

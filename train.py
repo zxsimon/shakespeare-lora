@@ -36,6 +36,7 @@ model_checkpoint_interval = 1000
 mmlu_batch_size = 4
 mmlu_examples = 80
 smoltalk_batch_size = 4
+enable_llmjudge = True
 llmjudge_examples = 20
 test_examples = 40
 generate_examples = 4
@@ -198,11 +199,12 @@ for iter in tqdm(range(num_iters), desc="Training Loop"):
         mmlu_score, mmlu_baseline_score = evaluate_with_baseline(model, tokenizer, mmlu_generator, evaluate_mmlu, batch_size=mmlu_batch_size, total_examples=mmlu_examples)
         
         # LLM-as-a-judge Evaluation
-        print(f"Running LLM-as-a-judge evaluation...")
-        smoltalk_generator = smoltalk_prompt_generator(split="test", num_examples=llmjudge_examples)
-        smoltalk_convos, smoltalk_baseline_convos = evaluate_with_baseline(model, tokenizer, smoltalk_generator, generate_smoltalk, batch_size=smoltalk_batch_size, num_examples=llmjudge_examples)
-        smoltalk_score = llmjudge_conversations(smoltalk_convos, logger=logger)
-        smoltalk_baseline_score = llmjudge_conversations(smoltalk_baseline_convos, logger=None)
+        if enable_llmjudge:
+            print(f"Running LLM-as-a-judge evaluation...")
+            smoltalk_generator = smoltalk_prompt_generator(split="test", num_examples=llmjudge_examples)
+            smoltalk_convos, smoltalk_baseline_convos = evaluate_with_baseline(model, tokenizer, smoltalk_generator, generate_smoltalk, batch_size=smoltalk_batch_size, num_examples=llmjudge_examples)
+            llmjudge_score = llmjudge_conversations(smoltalk_convos, logger=logger)
+            llmjudge_baseline_score = llmjudge_conversations(smoltalk_baseline_convos, logger=None)
 
         # Log and print
         logger.log("eval", {
@@ -210,14 +212,15 @@ for iter in tqdm(range(num_iters), desc="Training Loop"):
             "test_loss": total_test_loss,
             "mmlu_score": mmlu_score,
             "mmlu_baseline_score": mmlu_baseline_score,
-            "smoltalk_score": smoltalk_score,
-            "smoltalk_baseline_score": smoltalk_baseline_score
+            "llmjudge_score": llmjudge_score if enable_llmjudge else None,
+            "llmjudge_baseline_score": llmjudge_baseline_score if enable_llmjudge else None
         })
         print(f"Test Loss: {total_test_loss:.2f}")
         print(f"MMLU Score: {mmlu_score:.2f}")
         print(f"MMLU Baseline Score: {mmlu_baseline_score:.2f}")
-        print(f"LLM-as-a-judge Overall Score: {smoltalk_score['overall']:.2f}")
-        print(f"LLM-as-a-judge Overall Baseline Score: {smoltalk_baseline_score['overall']:.2f}")
+        if enable_llmjudge:
+            print(f"LLM-as-a-judge Overall Score: {llmjudge_score['overall']:.2f}")
+            print(f"LLM-as-a-judge Overall Baseline Score: {llmjudge_baseline_score['overall']:.2f}")
         clear_cache(device)
 
     

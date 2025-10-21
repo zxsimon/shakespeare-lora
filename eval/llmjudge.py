@@ -14,7 +14,7 @@ def start_vllm_server(model_name = judge_model_name):
         "python", "-m", "vllm.entrypoints.openai.api_server",
         "--model", model_name,
         "--port", "1234",
-        "--gpu-memory-utilization", "0.3",  # Leave 70% for training
+        "--gpu-memory-utilization", "0.3",
         "--dtype", "bfloat16"
     ])
     

@@ -39,7 +39,7 @@ def evaluate_mmlu(model, tokenizer, generator = None, batch_size = 4, total_exam
 
         prompts, answers = map(list, zip(*islice(generator, batch_size)))
         answers = torch.tensor(answers).to(model.device)
-        tokenized_prompts = tokenizer(prompts, return_tensors="pt", padding=True).to(model.device)
+        tokenized_prompts = tokenizer(prompts, return_tensors="pt", padding=True, pad_to_multiple_of=8).to(model.device)
         input_ids, attention_mask = tokenized_prompts["input_ids"], tokenized_prompts["attention_mask"]
 
         with torch.autocast(device_type=model.device.type, dtype=torch.bfloat16):
@@ -69,9 +69,11 @@ def evaluate_mmlu(model, tokenizer, generator = None, batch_size = 4, total_exam
 if __name__ == "__main__":
     # Testing
     from transformers import AutoTokenizer, AutoModelForCausalLM
-    model_name = "Qwen/Qwen3-8B"
+    model_name = "Qwen/Qwen3-0.6B"
     model = AutoModelForCausalLM.from_pretrained(model_name, dtype=torch.bfloat16)
     device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     model = model.to(device)
+    if torch.cuda.is_available():
+        model = torch.compile(model, mode="reduce-overhead")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     print(evaluate_mmlu(model, tokenizer, batch_size=4, total_examples=100, show_modal_tokens=True))

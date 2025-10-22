@@ -14,7 +14,7 @@ def smoltalk_prompt_generator(split="test", num_examples=1000):
         yield prompt
 
 @torch.no_grad()
-def generate_smoltalk(model, tokenizer, batch_size = 4, num_examples = 100, generator = None, max_new_tokens = 1000):
+def generate_smoltalk(model, tokenizer, batch_size = 4, num_examples = 100, generator = None, max_new_tokens = 512):
 
     """Generate responses for smoltalk."""
 
@@ -61,8 +61,7 @@ if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     if torch.cuda.is_available():
         model = torch.compile(model, mode="max-autotune")
-        dummy_input = tokenizer("Test", return_tensors="pt").to(model.device)
-        model.generate(**dummy_input, max_new_tokens=10)  # Warmup
+        torch.set_float32_matmul_precision('high')
     generator = smoltalk_prompt_generator()
     
     # Throughput measurement code

@@ -1,6 +1,5 @@
 from itertools import tee
-import json, torch
-import os
+import json, torch, os, requests
 from openai import OpenAI
 
 class Logger:
@@ -33,6 +32,14 @@ class Logger:
         self._ensure_file_reset(self.log_file_judge)
         with open(self.log_file_judge, "a") as f:
             f.write(content + "\n")
+
+def check_server(host="127.0.0.1", port=1234, timeout=2):
+    """Check if an OpenAI server is already running."""
+    try:
+        response = requests.get(f"http://{host}:{port}/health", timeout=timeout)
+        return response.status_code == 200
+    except requests.exceptions.RequestException:
+        return False
 
 def generate_completion(prompt, temperature = 0.0, max_tokens = 1000):
     client = OpenAI(base_url="http://127.0.0.1:1234/v1", api_key="not-needed")

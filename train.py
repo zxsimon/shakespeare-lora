@@ -116,6 +116,8 @@ def dataset_loader(dataset_name, split, batch_size, trim=0.2, visualize=False):
 # ---- Setting up Training ----
 
 model = get_lora_model(model_name, lora=True, r=lora_r, lora_alpha=lora_alpha, target_modules=lora_target_modules)
+if torch.cuda.is_available():
+    torch.set_float32_matmul_precision("high")
 # Constant learning rate for now
 optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr)
 
@@ -145,6 +147,7 @@ logger.log("config", {
     "num_iters": num_iters,
     "learning_rate": lr
 })
+
 
 # ---- Main Training Loop ----
 

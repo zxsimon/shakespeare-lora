@@ -6,8 +6,6 @@ from peft import get_peft_model, LoraConfig
 import code
 
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
-
-
 default_model_name = "Qwen/Qwen3-0.6B"
 
 tokenizer = AutoTokenizer.from_pretrained(default_model_name)

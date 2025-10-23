@@ -1,10 +1,10 @@
 from eval.smoltalk import generate_smoltalk
-from utils import generate_completion, Logger
-import subprocess, torch, time, requests, json
+from utils import generate_completion, Logger, check_server
+import subprocess, torch, time, requests, json, code
 from tqdm import tqdm
 
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
-judge_model_name = "Qwen/Qwen3-30B-A3B-Instruct-2507"
+judge_model_name = "Qwen/Qwen3-30B-A3B-Instruct-2507-FP8"
 
 
 def start_vllm_server(model_name = judge_model_name):
@@ -13,9 +13,11 @@ def start_vllm_server(model_name = judge_model_name):
     process = subprocess.Popen([
         "python", "-m", "vllm.entrypoints.openai.api_server",
         "--model", model_name,
+        "--host", "127.0.0.1",
         "--port", "1234",
-        "--gpu-memory-utilization", "0.3",
-        "--dtype", "bfloat16"
+        "--gpu-memory-utilization", "0.6",
+        "--dtype", "auto",
+        "--max-model-len", "16384"
     ])
     
     # Wait for server to start
@@ -132,11 +134,13 @@ def judge_prompt(original_query, model_response):
     return prompt
 
 
-def llmjudge_conversations(conversations, logger = None):
+def llmjudge_conversations(conversations, logger = None, host = "127.0.0.1", port = "1234"):
     """Evaluate a list of conversations with LLM-as-a-judge."""
     
-    # Start vLLM server if CUDA is available. Otherwise, set up LMStudio manually.
-    if torch.cuda.is_available():
+    server_already_running = check_server(host, port)
+    process = None
+    # Start vLLM server on CUDA. On Mac, set up LMStudio manually.
+    if torch.cuda.is_available() and not server_already_running:
         process = start_vllm_server()
 
     eval_count = 0
@@ -165,7 +169,7 @@ def llmjudge_conversations(conversations, logger = None):
             completion["response"] = response
             logger.log_judge(json.dumps(completion))
 
-    if torch.cuda.is_available() and process:
+    if process:
         process.terminate()
     
     if eval_count > 0:
@@ -184,4 +188,5 @@ if __name__ == "__main__":
     
     logger = Logger("shakespeare-lora", run_name="llmjudge-test")
     conversations = generate_smoltalk(model, tokenizer, num_examples = 4, batch_size = 2)
+    code.interact(local=locals())
     print(llmjudge_conversations(conversations, logger=logger))

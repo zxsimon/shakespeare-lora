@@ -2,10 +2,9 @@ from eval.mmlu import evaluate_mmlu, generator_mmlu
 from eval.llmjudge import llmjudge_conversations
 from eval.smoltalk import generate_smoltalk, smoltalk_prompt_generator
 from model import get_lora_model
-from utils import Logger, evaluate_with_baseline, clear_cache
+from utils import Logger, clear_cache
 from transformers import AutoTokenizer
 from tqdm import tqdm
-from itertools import tee
 import json, random, torch, os
 import torch.nn.functional as F
 import code
@@ -19,7 +18,7 @@ model_name = "Qwen/Qwen3-0.6B"
 lora_r = 16
 lora_alpha = 32
 lora_target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]
-dataset_name = "ultrafeedback"
+dataset_name = "alpaca"
 run_name = "test-run"
 project_name = "shakespeare-lora"
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
@@ -89,7 +88,9 @@ def dataset_loader(dataset_name, split, batch_size, trim=0.2, visualize=False):
     old_len = len(lines)
     floor, ceil = torch.quantile(lens, torch.tensor([trim, 1 - trim])).to(int)
     lines = [line for line in lines if len(line) > floor and len(line) < ceil]
-    print(f"Trimmed {dataset_name} dataset from {old_len} to {len(lines)}")
+    new_lens = torch.tensor([len(line) for line in lines], dtype=torch.float)
+    print(f"Trimmed {dataset_name} dataset from {old_len} to {len(lines)} examples")
+    print(f"Estimated length distribution (1 token = 4 chars): mean={int(new_lens.mean()/4)}, std={int(new_lens.std()/4)}, min={int(new_lens.min()/4)}, max={int(new_lens.max()/4)}")
     
     def batch_generator():
         random.Random(42).shuffle(lines)
@@ -198,32 +199,25 @@ for iter in tqdm(range(num_iters), desc="Training Loop"):
         
         # MMLU Evaluation
         print(f"Running MMLU evaluation...")
-        mmlu_generator = generator_mmlu(split="test", max_examples=mmlu_examples)
-        mmlu_score, mmlu_baseline_score = evaluate_with_baseline(model, tokenizer, mmlu_generator, evaluate_mmlu, batch_size=mmlu_batch_size, total_examples=mmlu_examples)
+        mmlu_score = evaluate_mmlu(model, tokenizer, batch_size=mmlu_batch_size, total_examples=mmlu_examples)
         
         # LLM-as-a-judge Evaluation
         if enable_llmjudge:
             print(f"Running LLM-as-a-judge evaluation...")
-            smoltalk_generator = smoltalk_prompt_generator(split="test", num_examples=llmjudge_examples)
-            smoltalk_convos, smoltalk_baseline_convos = evaluate_with_baseline(model, tokenizer, smoltalk_generator, generate_smoltalk, batch_size=smoltalk_batch_size, num_examples=llmjudge_examples)
+            smoltalk_convos = generate_smoltalk(model, tokenizer, batch_size=smoltalk_batch_size, num_examples=llmjudge_examples, max_new_tokens=512)
             llmjudge_score = llmjudge_conversations(smoltalk_convos, logger=logger)
-            llmjudge_baseline_score = llmjudge_conversations(smoltalk_baseline_convos, logger=None)
 
         # Log and print
         logger.log("eval", {
             "iter": iter,
             "test_loss": total_test_loss,
             "mmlu_score": mmlu_score,
-            "mmlu_baseline_score": mmlu_baseline_score,
             "llmjudge_score": llmjudge_score if enable_llmjudge else None,
-            "llmjudge_baseline_score": llmjudge_baseline_score if enable_llmjudge else None
         })
         print(f"Test Loss: {total_test_loss:.2f}")
         print(f"MMLU Score: {mmlu_score:.2f}")
-        print(f"MMLU Baseline Score: {mmlu_baseline_score:.2f}")
         if enable_llmjudge:
             print(f"LLM-as-a-judge Overall Score: {llmjudge_score['overall']:.2f}")
-            print(f"LLM-as-a-judge Overall Baseline Score: {llmjudge_baseline_score['overall']:.2f}")
         clear_cache(device)
 
     

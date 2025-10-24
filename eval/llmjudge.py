@@ -7,33 +7,6 @@ device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is
 judge_model_name = "Qwen/Qwen3-30B-A3B-Instruct-2507-FP8"
 
 
-def start_vllm_server(model_name = judge_model_name):
-    """Start vLLM in background"""
-    
-    process = subprocess.Popen([
-        "python", "-m", "vllm.entrypoints.openai.api_server",
-        "--model", model_name,
-        "--host", "127.0.0.1",
-        "--port", "1234",
-        "--gpu-memory-utilization", "0.6",
-        "--dtype", "auto",
-        "--max-model-len", "16384"
-    ])
-    
-    # Wait for server to start
-    time.sleep(30)
-    
-    # Check if ready
-    for _ in range(30):
-        try:
-            requests.get("http://localhost:1234/health")
-            print("vLLM server ready!")
-            return process
-        except:
-            time.sleep(2)
-    
-    raise RuntimeError("vLLM server failed to start")
-
 def judge_prompt(original_query, model_response):
     """Generate a prompt for the LLM-as-a-judge to evaluate a Shakespeare-style response."""
     
@@ -137,16 +110,12 @@ def judge_prompt(original_query, model_response):
 def llmjudge_conversations(conversations, logger = None, host = "127.0.0.1", port = "1234"):
     """Evaluate a list of conversations with LLM-as-a-judge."""
     
-    server_already_running = check_server(host, port)
-    process = None
-    # Start vLLM server on CUDA. On Mac, set up LMStudio manually.
-    if torch.cuda.is_available() and not server_already_running:
-        process = start_vllm_server()
+    if not (server_already_running := check_server(host, port)):
+        raise ValueError("LLM-as-a-judge server is not running. On CUDA, please start it with `python -m vllm.entrypoints.openai.api_server --model Qwen/Qwen3-30B-A3B-Instruct-2507-FP8 --host 127.0.0.1 --port 1234 --dtype auto --gpu-memory-utilization 0.6 --max-model-len 8192`")
 
     eval_count = 0
     score_keys = ["authenticity", "intensity", "helpfulness", "clarity", "appropriateness", "overall"]
     scores = {key: 0 for key in score_keys}
-
 
     for prompt, response in tqdm(conversations, total=len(conversations), desc=f"Evaluating conversations"):
         prompt_for_judge = judge_prompt(prompt, response)
@@ -168,9 +137,6 @@ def llmjudge_conversations(conversations, logger = None, host = "127.0.0.1", por
             completion["prompt"] = prompt
             completion["response"] = response
             logger.log_judge(json.dumps(completion))
-
-    if process:
-        process.terminate()
     
     if eval_count > 0:
         scores = {k: v / eval_count for k, v in scores.items()}
@@ -183,10 +149,12 @@ if __name__ == "__main__":
     model_name = "Qwen/Qwen3-0.6B"
     model = AutoModelForCausalLM.from_pretrained(model_name, dtype=torch.bfloat16)
     device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+    if torch.cuda.is_available():
+        model = torch.compile(model, mode="reduce-overhead")
+        torch.set_float32_matmul_precision("high")
     model = model.to(device)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     
     logger = Logger("shakespeare-lora", run_name="llmjudge-test")
     conversations = generate_smoltalk(model, tokenizer, num_examples = 4, batch_size = 2)
-    code.interact(local=locals())
     print(llmjudge_conversations(conversations, logger=logger))

@@ -51,6 +51,7 @@ def generate_completion(prompt, temperature = 0.0, max_tokens = 1000):
     )
     return response.choices[0].message.content
 
+# Currently unused due to bad interactions between peft and torch.compile
 def evaluate_with_baseline(model, tokenizer, generator, evaluate_function, **kwargs):
     generator_lora, generator_baseline = tee(generator, 2)
     score_lora = evaluate_function(model, tokenizer, generator=generator_lora, **kwargs)

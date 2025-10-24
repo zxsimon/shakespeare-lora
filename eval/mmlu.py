@@ -21,7 +21,7 @@ def generator_mmlu(split="test", max_examples=1000):
         yield prompt, doc["answer"]
 
 @torch.no_grad()
-def evaluate_mmlu(model, tokenizer, generator = None, batch_size = 4, total_examples = 8, show_modal_tokens = False):
+def evaluate_mmlu(model, tokenizer, batch_size = 4, total_examples = 8, show_modal_tokens = False, generator = None):
     """Evaluate the model on the MMLU dataset."""
 
     if generator is None:
@@ -32,7 +32,6 @@ def evaluate_mmlu(model, tokenizer, generator = None, batch_size = 4, total_exam
 
     total_evaluated = 0
     total_correct = 0
-    
     num_iters = total_examples // batch_size
 
     for _ in tqdm(range(num_iters), total=num_iters, desc="Evaluating MMLU"):

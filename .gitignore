@@ -5,3 +5,4 @@ __pycache__/
 checkpoints/
 requirements.txt
 /logs
+README.md

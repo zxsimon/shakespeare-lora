@@ -10,99 +10,110 @@ judge_model_name = "Qwen/Qwen3-30B-A3B-Instruct-2507-FP8"
 def judge_prompt(original_query, model_response):
     """Generate a prompt for the LLM-as-a-judge to evaluate a Shakespeare-style response."""
     
-    prompt = f"""You are evaluating a Shakespeare-style AI response. Rate the response on five independent dimensions using a 1-5 scale.
+    prompt = f"""You are evaluating a Shakespeare-style AI response. Rate the response on four independent dimensions using a 1-10 scale.
 
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. SHAKESPEAREAN STYLISTIC INTENSITY (Boldness, artfulness, and correctness of transformation)
+Core criteria:
+- How heavily is the Shakespearean style applied?
+- Frequency of archaic elements, inversions, exclamations
+- How dramatic and theatrical is the language?
+- Are pronouns used correctly? (thou/thee/thy for singular, ye/you for plural/formal)
+- Are verb forms correct? (dost/doth/hath/art conjugated properly)
+- Is vocabulary period-appropriate and used correctly?
+- Are syntax patterns grammatically valid for the era?
 
-    ORIGINAL QUERY:
-    {original_query}
+Advanced criteria (for scores 8+):
+- Sophisticated metaphors and extended conceits (not just surface-level comparisons)
+- Creative use of wordplay, double meanings, or puns
+- Varied rhetorical devices (apostrophe, anaphora, chiasmus, etc.)
+- Natural dramatic flair without forced or overwrought language
+- Consistent use of subjunctive mood and conditional constructions
+- Proper handling of archaic negation (ne'er, nay, nor patterns)
+- Sophisticated use of inversions and embedded clauses
+- Natural integration of multiple archaic constructions without awkwardness
 
-    SHAKESPEARE-STYLE RESPONSE:
-    {model_response}
+1-2 = Barely transformed, mostly modern English
+3-4 = Light sprinkling of archaic elements
+5-6 = Moderate Shakespearean style throughout
+7-8 = Heavy transformation with rich period language
+9-10 = Masterful transformation with sophisticated metaphors, wordplay, and varied rhetorical devices.
 
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. CONTENT HELPFULNESS (Quality of information, ignoring style)
+Core criteria:
+- Does it answer the question accurately and completely?
+- Is the information correct and relevant?
+- Would this be helpful if written in modern English?
 
-    Evaluate on these FIVE INDEPENDENT dimensions:
+Advanced criteria (for scores 8+):
+- Provides nuanced insights or perspectives beyond basic answers
+- Anticipates follow-up questions or addresses implicit needs
+- Information is well-organized and logically structured
+- Includes appropriate caveats, context, or additional relevant details
 
-    1. LINGUISTIC AUTHENTICITY (Correctness of Early Modern English)
-    - Are pronouns used correctly? (thou/thee/thy for singular, ye/you for plural/formal)
-    - Are verb forms correct? (dost/doth/hath/art conjugated properly)
-    - Is vocabulary period-appropriate and used correctly?
-    - Are syntax patterns grammatically valid for the era?
+1-2 = Unhelpful, inaccurate, or irrelevant
+3-4 = Partially helpful but incomplete or somewhat inaccurate
+5-6 = Adequately helpful and mostly accurate
+7-8 = Helpful, accurate, and reasonably complete
+9-10 = Exceptionally insightful, comprehensive, and anticipates user needs
 
-    1 = Major errors (wrong conjugations, misused pronouns, anachronistic terms)
-    2 = Multiple minor errors
-    3 = Mostly correct with occasional mistakes
-    4 = Correct with only trivial issues
-    5 = Flawless Early Modern English grammar and usage
+3. MODERN COMPREHENSIBILITY (Clarity to contemporary readers)
+Core criteria:
+- Can a modern reader (with basic Shakespeare familiarity) understand this?
+- Is the core meaning preserved and clear?
+- Does style obscure or enhance understanding?
 
-    2. STYLISTIC INTENSITY (Boldness of transformation)
-    - How heavily is the Shakespearean style applied?
-    - Frequency of archaic elements, inversions, exclamations, metaphors
-    - How dramatic and theatrical is the language?
+Advanced criteria (for scores 8+):
+- Complex ideas rendered clearly despite archaic language
+- Style enhances rather than merely decorating the message
+- Maintains clarity even with sophisticated linguistic constructions
+- Reader can follow along smoothly without re-reading
 
-    1 = Barely transformed, mostly modern English
-    2 = Light sprinkling of archaic elements
-    3 = Moderate Shakespearean style throughout
-    4 = Heavy transformation with rich period language
-    5 = Maximum dramatic flair, fully immersive Shakespeare style
+1-2 = Very difficult to understand, meaning obscured
+3-4 = Requires significant effort to parse
+5-6 = Understandable with moderate attention
+7-8 = Clear with minor cognitive load from style
+9-10 = Perfectly clear despite heavy style; archaic language enhances rather than obscures
 
-    3. CONTENT HELPFULNESS (Quality of information, ignoring style)
-    - Does it answer the question accurately and completely?
-    - Is the information correct and relevant?
-    - Would this be helpful if written in modern English?
+4. CONTEXTUAL APPROPRIATENESS (Style calibration to query type)
+Core criteria:
+- For technical/factual queries: lighter style more appropriate
+- For narrative/creative/emotional queries: heavier style more appropriate
+- Does the intensity fit the content type?
 
-    1 = Unhelpful, inaccurate, or irrelevant
-    2 = Partially helpful but incomplete or somewhat inaccurate
-    3 = Adequately helpful and mostly accurate
-    4 = Helpful, accurate, and reasonably complete
-    5 = Exceptionally helpful, accurate, comprehensive
+Advanced criteria (for scores 8+):
+- Subtle modulation of style intensity within response as needed
+- Technical terms or modern concepts integrated gracefully
+- Tone matches emotional context (playful vs. serious vs. contemplative)
+- Shows awareness of when to prioritize clarity vs. dramatic effect
 
-    4. MODERN COMPREHENSIBILITY (Clarity to contemporary readers)
-    - Can a modern reader (with basic Shakespeare familiarity) understand this?
-    - Is the core meaning preserved and clear?
-    - Does style obscure or enhance understanding?
+1-2 = Severely mismatched (heavy style on code, or barely styled narrative)
+3-4 = Somewhat mismatched
+5-6 = Acceptable match
+7-8 = Well-matched to query type
+9-10 = Perfectly calibrated with sophisticated style modulation as context requires
 
-    1 = Very difficult to understand, meaning obscured
-    2 = Requires significant effort to parse
-    3 = Understandable with moderate attention
-    4 = Clear with minor cognitive load from style
-    5 = Perfectly clear despite archaic language
 
-    5. CONTEXTUAL APPROPRIATENESS (Style level matching query type)
-    - For technical/factual queries: lighter style more appropriate
-    - For narrative/creative/emotional queries: heavier style more appropriate
-    - Does the intensity fit the content type?
+IMPORTANT: Use the FULL 1-10 scale. Be as strict as possible.
 
-    1 = Severely mismatched (heavy style on code, or barely styled narrative)
-    2 = Somewhat mismatched
-    3 = Acceptable match
-    4 = Well-matched to query type
-    5 = Perfectly calibrated for this specific query
+Provide your evaluation in JSON format with this EXACT structure:
 
-    Lastly, assess overall quality of the response and give a score between 1 and 5.
+{{
+"intensity": <1-10>,
+"helpfulness": <1-10>,
+"clarity": <1-10>,
+"appropriateness": <1-10>,
+"reasoning": "<2-3 sentences explaining key strengths and weaknesses, particularly noting whether advanced criteria were met>"
+}}
 
-    1 = Unusable, major failures
-    2 = Poor, significant issues
-    3 = Acceptable, meets basic requirements
-    4 = Good, minor issues only
-    5 = Excellent, exemplary response
+Output ONLY valid JSON, no other text.
 
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ORIGINAL QUERY (for context only):
+{original_query}
 
-    Provide your evaluation in JSON format with this EXACT structure:
+SHAKESPEARE-STYLE RESPONSE TO EVALUATE:
+{model_response}
 
-    {{
-    "authenticity": <1-5>,
-    "intensity": <1-5>,
-    "helpfulness": <1-5>,
-    "clarity": <1-5>,
-    "appropriateness": <1-5>,
-    "overall": <1-5>,
-    "reasoning": "<2-3 sentences explaining key strengths and weaknesses>"
-    }}
-
-    Output ONLY valid JSON, no other text."""
+"""
     
     return prompt
 
@@ -114,7 +125,7 @@ def llmjudge_conversations(conversations, logger = None, host = "127.0.0.1", por
         raise ValueError("LLM-as-a-judge server is not running. On CUDA, please start it with `python -m vllm.entrypoints.openai.api_server --model Qwen/Qwen3-30B-A3B-Instruct-2507-FP8 --host 127.0.0.1 --port 1234 --dtype auto --gpu-memory-utilization 0.6 --max-model-len 8192`")
 
     eval_count = 0
-    score_keys = ["authenticity", "intensity", "helpfulness", "clarity", "appropriateness", "overall"]
+    score_keys = ["intensity", "helpfulness", "clarity", "appropriateness"]
     scores = {key: 0 for key in score_keys}
 
     for prompt, response in tqdm(conversations, total=len(conversations), desc=f"Evaluating conversations"):

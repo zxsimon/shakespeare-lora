@@ -1,0 +1,3 @@
+{"testing":"","lora_r":16,"lora_alpha":32,"lora_target_modules":"attn"}
+{"testing":"","lora_r":16,"lora_alpha":32,"lora_target_modules":"mlp"}
+{"testing":"","lora_r":16,"lora_alpha":32,"lora_target_modules":"all"}

@@ -1,3 +1,18 @@
-{"testing":"","lora_r":16,"lora_alpha":32,"lora_target_modules":"attn", "llmjudge":""}
-{"testing":"","lora_r":16,"lora_alpha":32,"lora_target_modules":"mlp"}
-{"testing":"","lora_r":16,"lora_alpha":32,"lora_target_modules":"all"}
+{"lora_r":4,"lora_target_modules":"attn", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":4,"lora_target_modules":"mlp", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":4,"lora_target_modules":"all", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":8,"lora_target_modules":"attn", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":8,"lora_target_modules":"mlp", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":8,"lora_target_modules":"all", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":16,"lora_target_modules":"attn", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":16,"lora_target_modules":"mlp", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":16,"lora_target_modules":"all", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":32,"lora_target_modules":"attn", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":32,"lora_target_modules":"mlp", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":32,"lora_target_modules":"all", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":64,"lora_target_modules":"attn", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":64,"lora_target_modules":"mlp", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":64,"lora_target_modules":"all", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":128,"lora_target_modules":"attn", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":128,"lora_target_modules":"mlp", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}
+{"lora_r":128,"lora_target_modules":"all", "llmjudge":"", "batch_size": 16, "mini_batch_size": 4}

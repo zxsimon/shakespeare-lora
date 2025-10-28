@@ -53,10 +53,10 @@ enable_llmjudge = args.llmjudge
 run_name = f"{dataset_name}-{args.lora_target_modules}-{lora_r}-{lora_alpha}"
 
 # Evaluation parameters
-mmlu_batch_size = 4
+mmlu_batch_size = 16
 mmlu_examples = 64
-smoltalk_batch_size = 8
-llmjudge_examples = 32
+smoltalk_batch_size = 16
+llmjudge_examples = 64
 test_examples = 64
 generate_examples = 4
 

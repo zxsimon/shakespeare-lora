@@ -1,17 +1,17 @@
-import torch
+import torch, os, json
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from peft import get_peft_model, LoraConfig
+from peft import get_peft_model, LoraConfig, PeftModel
 import code
 
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 default_model_name = "Qwen/Qwen3-0.6B"
 
-tokenizer = AutoTokenizer.from_pretrained(default_model_name)
-think_end_token_id = tokenizer.encode("</think>")[0]
-im_start_token_id = tokenizer.encode("<|im_start|>")[0]
-pad_token_id = tokenizer.pad_token_id
+tokenizer_qwen3 = AutoTokenizer.from_pretrained(default_model_name)
+think_end_token_id = tokenizer_qwen3.encode("</think>")[0]
+im_start_token_id = tokenizer_qwen3.encode("<|im_start|>")[0]
+pad_token_id = tokenizer_qwen3.pad_token_id
 
 def get_lora_model(model_name = default_model_name, lora = True, r = 16, lora_alpha = 32, target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]):
     lora_config = LoraConfig(
@@ -26,7 +26,7 @@ def get_lora_model(model_name = default_model_name, lora = True, r = 16, lora_al
     model.to(device)
     return model
 
-def test_generation(model, prompt = None, max_new_tokens=1000, show_thinking=True, format_output = False):
+def test_generation(model, tokenizer = tokenizer_qwen3, prompt = None, max_new_tokens=1000, show_thinking=True, format_output = False):
     
     if prompt is None:
         prompt = "Give me a short introduction to large language model."
@@ -61,6 +61,15 @@ def test_generation(model, prompt = None, max_new_tokens=1000, show_thinking=Tru
         if show_thinking:
             print(tokenizer.decode(think_ids, skip_special_tokens=True).strip("\n"))
         print(tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n"))
+
+def load_checkpoint(checkpoint_path):
+    with open(os.path.join(checkpoint_path, "adapter_config.json"), "r") as f:
+        adapter_config = json.load(f)
+    base_model_name = adapter_config["base_model_name_or_path"]
+    model = PeftModel.from_pretrained(AutoModelForCausalLM.from_pretrained(base_model_name, dtype=torch.bfloat16), checkpoint_path)
+    model.to(device)
+    model.eval()
+    return model
 
 if __name__ == "__main__":
     model = get_lora_model(lora=True, r=16, lora_alpha=32, target_modules=["q_proj", "k_proj", "v_proj", "o_proj"])

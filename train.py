@@ -50,7 +50,7 @@ generate_interval = args.generate_interval
 model_checkpoint_interval = args.model_checkpoint_interval
 enable_llmjudge = args.llmjudge
 
-run_name = f"{dataset_name}-{lora_target_modules}-{lora_r}-{lora_alpha}"
+run_name = f"{dataset_name}-{args.lora_target_modules}-{lora_r}-{lora_alpha}"
 
 # Evaluation parameters
 mmlu_batch_size = 4
@@ -245,7 +245,8 @@ for iter in tqdm(range(num_iters), desc="Training Loop"):
         print(f"Test Loss: {total_test_loss:.2f}")
         print(f"MMLU Score: {mmlu_score:.2f}")
         if enable_llmjudge:
-            print(f"LLM-as-a-judge Overall Score: {llmjudge_score['overall']:.2f}")
+            llmjudge_mean_score = sum(llmjudge_score.values())/len(llmjudge_score)
+            print(f"LLM-as-a-judge Average Score: {llmjudge_mean_score:.2f}")
         clear_cache(device)
 
     

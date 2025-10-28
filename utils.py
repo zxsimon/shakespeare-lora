@@ -18,10 +18,10 @@ class Logger:
                 pass  # Create/truncate file
             self._initialized_files.add(filepath)
     
-    def log(self, type, log):
+    def log(self, t, log):
         self._ensure_file_reset(self.log_file)
         content = {
-            "type": type,
+            "type": t,
             "log": log
         }
         with open(self.log_file, "a") as f:

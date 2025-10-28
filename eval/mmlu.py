@@ -73,6 +73,7 @@ if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     model = model.to(device)
     if torch.cuda.is_available():
-        model = torch.compile(model, mode="reduce-overhead")
+        model = torch.compile(model)
+        torch.set_float32_matmul_precision('high')
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     print(evaluate_mmlu(model, tokenizer, batch_size=4, total_examples=100, show_modal_tokens=True))

@@ -63,7 +63,7 @@ if __name__ == "__main__":
     model = model.to(device)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     if torch.cuda.is_available():
-        model = torch.compile(model, mode="max-autotune")
+        model = torch.compile(model)
         torch.set_float32_matmul_precision('high')
     generator = smoltalk_prompt_generator()
     zipped = generate_smoltalk(model, tokenizer, num_examples = 32, batch_size = 4, generator = generator)

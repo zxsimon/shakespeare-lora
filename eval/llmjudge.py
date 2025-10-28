@@ -161,11 +161,11 @@ if __name__ == "__main__":
     model = AutoModelForCausalLM.from_pretrained(model_name, dtype=torch.bfloat16)
     device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     if torch.cuda.is_available():
-        model = torch.compile(model, mode="reduce-overhead")
+        model = torch.compile(model)
         torch.set_float32_matmul_precision("high")
     model = model.to(device)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     
     logger = Logger("shakespeare-lora", run_name="llmjudge-test")
-    conversations = generate_smoltalk(model, tokenizer, num_examples = 4, batch_size = 2)
+    conversations = generate_smoltalk(model, tokenizer, num_examples = 32, batch_size = 8)
     print(llmjudge_conversations(conversations, logger=logger))

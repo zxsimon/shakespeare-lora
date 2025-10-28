@@ -15,7 +15,7 @@ MAX_SEQ_LENGTH = 2048
 project_name = "shakespeare-lora"
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", type=str, default="Qwen/Qwen3-0.6B")
+parser.add_argument("--model", type=str, default="Qwen/Qwen3-8B")
 parser.add_argument("--lora_r", type=int, default=16)
 parser.add_argument("--lora_alpha", type=int, default=32)
 parser.add_argument("--lora_target_modules", type=str, choices=["attn", "mlp", "all"], default="attn")
@@ -149,6 +149,7 @@ def dataset_loader(dataset_name, split, batch_size, trim=0.2, visualize=False):
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 model = get_lora_model(model_name, lora=True, r=lora_r, lora_alpha=lora_alpha, target_modules=lora_target_modules)
 if torch.cuda.is_available():
+    model = torch.compile(model)
     torch.set_float32_matmul_precision("high")
 # Constant learning rate for now
 optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr)

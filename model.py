@@ -13,14 +13,14 @@ think_end_token_id = tokenizer.encode("</think>")[0]
 im_start_token_id = tokenizer.encode("<|im_start|>")[0]
 pad_token_id = tokenizer.pad_token_id
 
-def get_lora_model(model = default_model_name, lora = True, r = 16, lora_alpha = 32, target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]):
+def get_lora_model(model_name = default_model_name, lora = True, r = 16, lora_alpha = 32, target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]):
     lora_config = LoraConfig(
                         r=r,
                         lora_alpha=lora_alpha,  
                         target_modules=target_modules,
                         bias="none",
                     )
-    model = AutoModelForCausalLM.from_pretrained(default_model_name, dtype=torch.bfloat16)
+    model = AutoModelForCausalLM.from_pretrained(model_name, dtype=torch.bfloat16)
     if lora:
         model = get_peft_model(model, lora_config)
     model.to(device)

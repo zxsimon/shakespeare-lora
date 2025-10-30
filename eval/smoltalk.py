@@ -57,7 +57,7 @@ def generate_smoltalk(model, tokenizer, batch_size = 4, num_examples = 100, max_
 
 if __name__ == "__main__":
     from transformers import AutoTokenizer, AutoModelForCausalLM
-    model_name = "Qwen/Qwen3-0.6B"
+    model_name = "Qwen/Qwen3-8B"
     model = AutoModelForCausalLM.from_pretrained(model_name, dtype=torch.bfloat16)
     device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     model = model.to(device)

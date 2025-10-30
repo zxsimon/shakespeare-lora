@@ -20,14 +20,14 @@ parser.add_argument("--lora_r", type=int, default=16)
 parser.add_argument("--lora_alpha", type=int, default=32)
 parser.add_argument("--lora_target_modules", type=str, choices=["attn", "mlp", "all"], default="attn")
 parser.add_argument("--dataset", type=str, default="alpaca")
-parser.add_argument("--epochs", type=int, default=10)
-parser.add_argument("--mini_batch_size", type=int, default=4)
+parser.add_argument("--epochs", type=int, default=5)
+parser.add_argument("--mini_batch_size", type=int, default=2)
 parser.add_argument("--batch_size", type=int, default=8)
 parser.add_argument("--lr", type=float, default=2e-4)
 parser.add_argument("--max_train_iters", type=int, default=10000)
-parser.add_argument("--eval_interval", type=int, default=200)
-parser.add_argument("--generate_interval", type=int, default=500)
-parser.add_argument("--model_checkpoint_interval", type=int, default=1000)
+parser.add_argument("--eval_interval", type=int, default=100)
+parser.add_argument("--generate_interval", type=int, default=200)
+parser.add_argument("--model_checkpoint_interval", type=int, default=200)
 parser.add_argument("--llmjudge", action="store_true", default=False)
 parser.add_argument("--testing", action="store_true", default=False)
 args = parser.parse_args()
@@ -53,9 +53,9 @@ enable_llmjudge = args.llmjudge
 run_name = f"{dataset_name}-{args.lora_target_modules}-{lora_r}-{lora_alpha}"
 
 # Evaluation parameters
-mmlu_batch_size = 16
+mmlu_batch_size = 4
 mmlu_examples = 64
-smoltalk_batch_size = 16
+smoltalk_batch_size = 4
 llmjudge_examples = 64
 test_examples = 64
 generate_examples = 4
@@ -154,8 +154,8 @@ if torch.cuda.is_available():
 # Constant learning rate for now
 optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr)
 
-train_size, train_loader = dataset_loader(dataset_name, "train", mini_batch_size, trim=0.2, visualize=False)
-test_size, test_loader = dataset_loader(dataset_name, "test", mini_batch_size, trim=0.2, visualize=False)
+train_size, train_loader = dataset_loader(dataset_name, "train", mini_batch_size, trim=0.04, visualize=False)
+test_size, test_loader = dataset_loader(dataset_name, "test", mini_batch_size, trim=0.04, visualize=False)
 
 assert batch_size % mini_batch_size == 0, "batch_size must be divisible by mini_batch_size"
 grad_accum_steps = batch_size // mini_batch_size

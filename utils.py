@@ -44,13 +44,19 @@ def check_server(host="127.0.0.1", port=1234, timeout=2):
 def generate_completion(prompt, temperature = 0.0, max_tokens = 1000):
     client = OpenAI(base_url="http://127.0.0.1:1234/v1", api_key="not-needed")
     model_name = client.models.list().data[0].id
-    response = client.chat.completions.create(
-        model=model_name,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=temperature,
-        max_tokens=max_tokens,
-    )
-    return response.choices[0].message.content
+    try:
+        response = client.chat.completions.create(
+            model=model_name,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+        res =  response.choices[0].message.content
+    except Exception as e:
+        print(f"Error generating completion: {e}. Prompt: {prompt}")
+        res = None
+    
+    return res
 
 # Currently unused due to bad interactions between peft and torch.compile
 def evaluate_with_baseline(model, tokenizer, generator, evaluate_function, **kwargs):

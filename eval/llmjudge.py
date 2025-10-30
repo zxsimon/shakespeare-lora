@@ -131,6 +131,9 @@ def llmjudge_conversations(conversations, logger = None, host = "127.0.0.1", por
     for prompt, response in tqdm(conversations, total=len(conversations), desc=f"Evaluating conversations"):
         prompt_for_judge = judge_prompt(prompt, response)
         completion = generate_completion(prompt_for_judge)
+
+        if completion is None:
+            continue
         
         # Attempts to parse output as JSON
         try: 

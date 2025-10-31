@@ -20,14 +20,14 @@ parser.add_argument("--lora_r", type=int, default=16)
 parser.add_argument("--lora_alpha", type=int, default=32)
 parser.add_argument("--lora_target_modules", type=str, choices=["attn", "mlp", "all"], default="attn")
 parser.add_argument("--dataset", type=str, default="alpaca")
-parser.add_argument("--epochs", type=int, default=5)
-parser.add_argument("--mini_batch_size", type=int, default=2)
+parser.add_argument("--epochs", type=int, default=3)
+parser.add_argument("--mini_batch_size", type=int, default=4)
 parser.add_argument("--batch_size", type=int, default=8)
 parser.add_argument("--lr", type=float, default=2e-4)
-parser.add_argument("--max_train_iters", type=int, default=10000)
-parser.add_argument("--eval_interval", type=int, default=100)
-parser.add_argument("--generate_interval", type=int, default=200)
-parser.add_argument("--model_checkpoint_interval", type=int, default=200)
+parser.add_argument("--max_train_iters", type=int, default=5000)
+parser.add_argument("--eval_interval", type=int, default=150)
+parser.add_argument("--generate_interval", type=int, default=300)
+parser.add_argument("--model_checkpoint_interval", type=int, default=300)
 parser.add_argument("--llmjudge", action="store_true", default=False)
 parser.add_argument("--testing", action="store_true", default=False)
 args = parser.parse_args()
@@ -53,11 +53,11 @@ enable_llmjudge = args.llmjudge
 run_name = f"{dataset_name}-{args.lora_target_modules}-{lora_r}-{lora_alpha}"
 
 # Evaluation parameters
-mmlu_batch_size = 4
-mmlu_examples = 64
-smoltalk_batch_size = 4
-llmjudge_examples = 64
-test_examples = 64
+mmlu_batch_size = 8
+mmlu_examples = 128
+smoltalk_batch_size = 8
+llmjudge_examples = 32
+test_examples = 128
 generate_examples = 4
 
 # Short training run for testing

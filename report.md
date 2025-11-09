@@ -108,12 +108,12 @@ As noted earlier, the LLM-as-Judge scores are noisy across and within runs. This
 ---
 ## Citations
 
-[^1] Qwen Team, “Qwen3 Technical Report,” arXiv preprint, 2025. [Online]. Available: [https://arxiv.org/abs/2505.09388](https://arxiv.org/abs/2505.09388).
+[^1]: Qwen Team, “Qwen3 Technical Report,” arXiv preprint, 2025. [Online]. Available: [https://arxiv.org/abs/2505.09388](https://arxiv.org/abs/2505.09388).
 
 [^2]: Taori, R., Gulrajani, I., Zhang, T., Dubois, Y., Li, X., Guestrin, C., Liang, P., & Hashimoto, T. B. (2023). Stanford Alpaca: An Instruction-following LLaMA model. GitHub repository. https://github.com/tatsu-lab/stanford_alpaca
 
-[^3] L. B. Allal et al., “SmolLM2: When Smol Goes Big -- Data-Centric Training of a Small Language Model,” arXiv preprint, 2025. [Online]. Available: [https://arxiv.org/abs/2502.02737](https://arxiv.org/abs/2502.02737).
+[^3]: L. B. Allal et al., “SmolLM2: When Smol Goes Big -- Data-Centric Training of a Small Language Model,” arXiv preprint, 2025. [Online]. Available: [https://arxiv.org/abs/2502.02737](https://arxiv.org/abs/2502.02737).
 
-[^4] Hendrycks, D., Burns, C., Basart, S., Zou, A., Mazeika, M., Song, D., & Steinhardt, J. (2021). **Measuring Massive Multitask Language Understanding**. *Proceedings of the International Conference on Learning Representations (ICLR)*.
+[^4]: Hendrycks, D., Burns, C., Basart, S., Zou, A., Mazeika, M., Song, D., & Steinhardt, J. (2021). **Measuring Massive Multitask Language Understanding**. *Proceedings of the International Conference on Learning Representations (ICLR)*.
 
 [^5]: Schulman, John and Thinking Machines Lab, "LoRA Without Regret", Thinking Machines Lab: Connectionism, Sep 2025.

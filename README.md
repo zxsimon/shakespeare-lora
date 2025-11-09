@@ -34,7 +34,7 @@ Detailed setup, results, and discussions are available in [report.md](report.md)
 - Layer selection matters more than rank: rank 16 is a strong default. MLP-only performs better than attention-only; all-layers does not provide significant incremental improvements over MLP-only.
 - LLM-as-a-Judge is useful but difficult to implement reliably.
 
-### Single run plot (mlp-only r=16 α=32)
+### Single run plot (mlp-only r=8 α=32)
 <p><img src="results/single_run_plots/alpaca-mlp-8-32.png" width="600"></p>
 
 ## Reproduction

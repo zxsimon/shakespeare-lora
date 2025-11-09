@@ -1,10 +1,11 @@
 *.json
-!adapter_config.json
 play.py
 .DS_Store
 __pycache__/
 checkpoints/*
-!checkpoints/alpaca-mlp-8-32_1796
+!checkpoints/alpaca-mlp-8-32_1796/*.json
+!checkpoints/alpaca-mlp-8-32_1796/*.safetensors
 requirements.txt
-/logs
+logs/*
+!logs/*alpaca-mlp-8-32.jsonl
 /logs copy

@@ -55,7 +55,7 @@ We summarize LoRA rank effects across attention‑only, MLP‑only, and all‑la
 
 ## Findings and Discussion
 
-### 1. The model transfers Shakespearean style while largely retaining capabilities for short conversations; responses become briefer and sometimes less helpful.
+### 1. LoRA fine-tuning achieves Shakespearean style transfer while largely retaining capabilities for short conversations; responses become briefer and sometimes less helpful.
 
 Using the MLP‑only r=16 checkpoint as an example, the model is convincingly Shakespearean. Observations include:
 
@@ -76,7 +76,7 @@ Across modules, varying rank does not materially change MMLU or LLM‑as‑a‑J
 
 MLP‑only achieves better train/test loss than attention‑only; all‑layers adds little beyond MLP‑only. This observation echoes the findings of [^5]. Importantly, on Qwen3‑8B, MLP‑only LoRA uses ~28M trainable params at r=16 (0.34%) vs 15M for attention‑only (0.19%), so gains should be weighed against added capacity.
 
-### 3. Challenges in implementing LLM-as-a-Judge
+### 3. LLM-as-a-Judge is useful but difficult to implement reliably
 
 #### LLM-as-a-Judge Hallucinations
 Looking at some of the LLM-as-a-Judge logs, we observe that the judge model hallucinates when providing reasoning for its scores. In the example below, the judge claims the response uses "archaic pronouns (thou, thee)" and "inverted syntax" - none of which appear in the actual response. The judge may be anchoring on its rubric rather than the response, 

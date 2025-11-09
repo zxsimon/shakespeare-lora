@@ -11,13 +11,14 @@ parser.add_argument("--iter", type=int, default=-1)
 parser.add_argument("--dataset", type=str, default="alpaca")
 args = parser.parse_args()
 
+BLUE = "\033[94m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+RESET = "\033[0m"
+
 def find_last_checkpoint():
     prefix = f"{args.dataset}-{args.lora_target_modules}-{args.lora_r}-{args.lora_alpha}"
     return max([int(e.name.split("_")[-1]) for e in os.scandir(f"checkpoints") if e.is_dir() and e.name.startswith(prefix)])
-
-checkpoint_dir = f"checkpoints/{args.dataset}-{args.lora_target_modules}-{args.lora_r}-{args.lora_alpha}_{args.iter if args.iter != -1 else find_last_checkpoint()}"
-model = load_checkpoint(checkpoint_dir)
-tokenizer = load_tokenizer(checkpoint_dir)
 
 SHAKESPEARE_LOADING = [
     "Anon! Thy verse prepares",
@@ -45,10 +46,6 @@ SHAKESPEARE_LOADING = [
     "The chorus clears its throat",
     "All’s well that loads well",
 ]
-
-BLUE = "\033[94m"
-YELLOW = "\033[93m"
-RESET = "\033[0m"
 
 class LoadingDots:
     def __init__(self):
@@ -87,11 +84,15 @@ class LoadingDots:
         self._t = None
         self._stop.clear()
 
-ascii_art = "<(o‿o)>ノ🪶 'Pray, send thy prompt.'"
+checkpoint_dir = f"checkpoints/{args.dataset}-{args.lora_target_modules}-{args.lora_r}-{args.lora_alpha}_{args.iter if args.iter != -1 else find_last_checkpoint()}"
+model = load_checkpoint(checkpoint_dir)
+print(f"{RED}Loaded checkpoint from {checkpoint_dir}{RESET}")
+tokenizer = load_tokenizer(checkpoint_dir)
 
 def main():
 
-    print(f"{BLUE}{ascii_art}{RESET}")
+    print(f"{RED}/exit to exit, /reset to clear context{RESET}")
+    print(f"{BLUE}<(o‿o)>ノ🪶 'Pray, send thy prompt.'{RESET}")
     output = ""
 
     while True:
@@ -107,6 +108,9 @@ def main():
 
         if not user: continue
         if user == "/exit": break
+        if user == "/reset": 
+            output = ""
+            continue
 
         if not output:
             messages = [

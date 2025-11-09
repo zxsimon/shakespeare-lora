@@ -1,6 +1,5 @@
-from datasets import load_dataset, Dataset
-import code
-from utils import generate_completion
+from datasets import load_dataset
+from src.utils import generate_completion
 import json
 from tqdm import tqdm
 import argparse

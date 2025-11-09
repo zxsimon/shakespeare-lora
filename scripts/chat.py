@@ -110,6 +110,7 @@ def main():
         if user == "/exit": break
         if user == "/reset": 
             output = ""
+            print(f"{BLUE}<(o‿o)>ノ🪶 'Pray, send thy prompt.'{RESET}")
             continue
 
         if not output:

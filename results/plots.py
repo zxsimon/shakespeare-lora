@@ -315,7 +315,7 @@ def plot_judge_overall_vs_rank(all_results):
         ax.grid(True, which="both", linestyle=":", linewidth=0.6, alpha=0.6)
         ax.set_ylim(5.5, 8.5)
         # defer legend to a shared, figure-level legend
-    axes[0].set_ylabel("LLM-as-Judge Overall (1..10)")
+    axes[0].set_ylabel("LLM-as-Judge Overall (1-10)")
     # Shared legend outside at the bottom across all subplots
     handles_all, labels_all = [], []
     for ax in axes:

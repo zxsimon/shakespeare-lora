@@ -63,6 +63,8 @@ def test_generation(model, tokenizer = tokenizer_qwen3, prompt = None, max_new_t
         print(tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n"))
 
 def load_checkpoint(checkpoint_path):
+    if not os.path.exists(checkpoint_path):
+        raise ValueError(f"Checkpoint not found at {checkpoint_path}")
     with open(os.path.join(checkpoint_path, "adapter_config.json"), "r") as f:
         adapter_config = json.load(f)
     base_model_name = adapter_config["base_model_name_or_path"]
@@ -70,6 +72,14 @@ def load_checkpoint(checkpoint_path):
     model.to(device)
     model.eval()
     return model
+
+def load_tokenizer(checkpoint_path):
+    if not os.path.exists(checkpoint_path):
+        raise ValueError(f"Checkpoint not found at {checkpoint_path}")
+    with open(os.path.join(checkpoint_path, "adapter_config.json"), "r") as f:
+        adapter_config = json.load(f)
+    base_model_name = adapter_config["base_model_name_or_path"]
+    return AutoTokenizer.from_pretrained(base_model_name)
 
 if __name__ == "__main__":
     model = get_lora_model(lora=True, r=16, lora_alpha=32, target_modules=["q_proj", "k_proj", "v_proj", "o_proj"])

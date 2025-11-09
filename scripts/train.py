@@ -1,17 +1,23 @@
 from eval.mmlu import evaluate_mmlu
 from eval.llmjudge import llmjudge_conversations
 from eval.smoltalk import generate_smoltalk, smoltalk_prompt_generator
-from model import get_lora_model
-from utils import Logger, clear_cache
+from src.model import get_lora_model
+from src.utils import Logger, clear_cache
 from transformers import AutoTokenizer
 from tqdm import tqdm
-import json, random, torch, os, argparse, time, code
+import json, random, torch, os, argparse, time
 import torch.nn.functional as F
 
-# ---- Hyperparameters ----
+# ---- Constants ----
 
 os.environ['TOKENIZERS_PARALLELISM'] = "false"
 MAX_SEQ_LENGTH = 2048
+GREEN = "\033[92m"
+RESET = "\033[0m"
+RED = "\033[91m"
+
+# ---- Hyperparameters ----
+
 project_name = "shakespeare-lora"
 
 parser = argparse.ArgumentParser()
@@ -21,13 +27,13 @@ parser.add_argument("--lora_alpha", type=int, default=32)
 parser.add_argument("--lora_target_modules", type=str, choices=["attn", "mlp", "all"], default="attn")
 parser.add_argument("--dataset", type=str, default="alpaca")
 parser.add_argument("--epochs", type=int, default=3)
-parser.add_argument("--mini_batch_size", type=int, default=4)
+parser.add_argument("--mini_batch_size", type=int, default=2)
 parser.add_argument("--batch_size", type=int, default=8)
 parser.add_argument("--lr", type=float, default=2e-4)
 parser.add_argument("--max_train_iters", type=int, default=5000)
 parser.add_argument("--eval_interval", type=int, default=150)
 parser.add_argument("--generate_interval", type=int, default=300)
-parser.add_argument("--model_checkpoint_interval", type=int, default=300)
+parser.add_argument("--model_checkpoint_interval", type=int, default=500)
 parser.add_argument("--llmjudge", action="store_true", default=False)
 parser.add_argument("--testing", action="store_true", default=False)
 args = parser.parse_args()
@@ -60,8 +66,9 @@ llmjudge_examples = 32
 test_examples = 128
 generate_examples = 4
 
-# Short training run for testing
+# Short training run with a tiny model for testing
 if args.testing:
+    model_name = "Qwen/Qwen3-0.6B"
     run_name = "test-run"
     max_train_iters = 100
     eval_interval = 20
@@ -95,9 +102,6 @@ def tokenize_example(example):
 def visualize_tokens(ids, mask):
     """Helper function to visualize tokens and loss mask."""
 
-    GREEN = "\033[92m"
-    RESET = "\033[0m"
-    RED = "\033[91m"
     out = ""
     for i in range(len(ids)):
         if mask[i] == 0:
@@ -191,6 +195,10 @@ Testing on {test_size} unique examples.")
 trainable_parameters = sum([p.numel() for p in model.parameters() if p.requires_grad])
 total_parameters = sum([p.numel() for p in model.parameters()])
 print(f"Trainable parameters: {trainable_parameters}. Total parameters: {total_parameters}. Percentage of trainable parameters: {trainable_parameters / total_parameters * 100:.2f}%")
+
+if not enable_llmjudge:
+    print(f"{RED}LLM-as-a-judge evaluation is disabled. To enable it, use the --llmjudge flag.{RESET}")
+
 time_start = time.time()
 
 

@@ -1,17 +1,17 @@
 from itertools import islice
-import datasets
-import torch
+import datasets, time, torch
 from tqdm import tqdm
-import time
 
 
-def smoltalk_prompt_generator(split="test", num_examples=1000):
+def smoltalk_prompt_generator(split="test", num_examples=1000, max_chars=6000):
     """Generator for SmolTalk dataset. Chat template is not applied."""
 
     smoltalk = datasets.load_dataset("HuggingFaceTB/smol-smoltalk")
     smoltalk = smoltalk[split].shuffle().select(range(num_examples))
     for doc in smoltalk:
         prompt = doc['messages'][0]['content']
+        if len(prompt) > max_chars:
+            continue
         yield prompt
 
 @torch.no_grad()

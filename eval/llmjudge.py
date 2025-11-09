@@ -1,6 +1,6 @@
 from eval.smoltalk import generate_smoltalk
-from utils import generate_completion, Logger, check_server
-import subprocess, torch, time, requests, json, code
+from src.utils import generate_completion, Logger, check_server
+import torch, json
 from tqdm import tqdm
 
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"

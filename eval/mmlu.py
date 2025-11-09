@@ -1,6 +1,5 @@
 from itertools import islice
-import datasets
-import torch
+import datasets, torch
 from tqdm import tqdm
 
 

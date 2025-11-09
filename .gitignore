@@ -1,8 +1,10 @@
 *.json
+!adapter_config.json
 play.py
 .DS_Store
 __pycache__/
-checkpoints/
+checkpoints/*
+!checkpoints/alpaca-mlp-16-32_1796
 requirements.txt
 /logs
-README.md
+/logs copy

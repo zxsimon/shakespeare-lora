@@ -8,12 +8,11 @@ A project exploring parameter-efficient fine-tuning and LLM-as-a-judge evaluatio
 1) Install dependencies:
 ```bash
 git clone https://github.com/zxsimon/shakespeare-lora.git
-conda create -n shakespeare-lora python=3.10 -y
-conda activate shakespeare-lora
-pip install -e .
+conda create -n shakespeare-lora python=3.10 -y && conda activate shakespeare-lora
+cd shakespeare-lora && pip install -e .
 ```
 
-2) Chat (uses the included `alpaca-mlp-8-32_1796` checkpoint)
+2) Chat (downloads Qwen3-8B ~20GB if not already cached; uses the included `alpaca-mlp-8-32_1796` checkpoint; requires ~20GB of RAM)
 
 ```bash
 chat-lora

@@ -12,7 +12,7 @@ parser.add_argument("--dataset", type=str, default="alpaca")
 args = parser.parse_args()
 
 BLUE = "\033[94m"
-RED = "\033[91m"
+GREEN = "\033[92m"
 YELLOW = "\033[93m"
 RESET = "\033[0m"
 
@@ -86,12 +86,12 @@ class LoadingDots:
 
 checkpoint_dir = f"checkpoints/{args.dataset}-{args.lora_target_modules}-{args.lora_r}-{args.lora_alpha}_{args.iter if args.iter != -1 else find_last_checkpoint()}"
 model = load_checkpoint(checkpoint_dir)
-print(f"{RED}Loaded checkpoint from {checkpoint_dir}{RESET}")
+print(f"{GREEN}Loaded checkpoint from {checkpoint_dir}{RESET}")
 tokenizer = load_tokenizer(checkpoint_dir)
 
 def main():
 
-    print(f"{RED}/exit to exit, /reset to clear context{RESET}")
+    print(f"{GREEN}/exit to exit, /reset to clear context{RESET}")
     print(f"{BLUE}<(o‿o)>ノ🪶 'Pray, send thy prompt.'{RESET}")
     output = ""
 

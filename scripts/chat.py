@@ -4,7 +4,7 @@ from src.model import load_checkpoint, load_tokenizer
 os.environ['TOKENIZERS_PARALLELISM'] = "false"
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--lora_r", type=int, default=16)
+parser.add_argument("--lora_r", type=int, default=8)
 parser.add_argument("--lora_alpha", type=int, default=32)
 parser.add_argument("--lora_target_modules", type=str, choices=["attn", "mlp", "all"], default="mlp")
 parser.add_argument("--iter", type=int, default=-1)
@@ -99,7 +99,7 @@ def main():
         
         sys.stdout.flush()
         try:
-            user = input("You: " + YELLOW).strip()
+            user = input("User: " + YELLOW).strip()
         except (EOFError, KeyboardInterrupt):
             break
         sys.stdout.write("\033[F\033[2K")

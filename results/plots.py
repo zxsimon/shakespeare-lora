@@ -554,7 +554,7 @@ plot_train_loss_vs_rank(all_results)
 
 dataset = "alpaca"
 lora_target_modules = "mlp"
-lora_r = 16
+lora_r = 8
 lora_alpha = 32
 
 results = parse_log(dataset, lora_target_modules, lora_r, lora_alpha)

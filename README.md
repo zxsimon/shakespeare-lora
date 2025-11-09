@@ -13,7 +13,7 @@ conda activate shakespeare-lora
 pip install -e .
 ```
 
-2) Chat (uses the included `alpaca-mlp-16-32_1796` checkpoint)
+2) Chat (uses the included `alpaca-mlp-8-32_1796` checkpoint)
 
 ```bash
 chat-lora
@@ -35,7 +35,7 @@ Detailed setup, results, and discussions are available in [report.md](report.md)
 - LLM-as-a-Judge is useful but difficult to implement reliably.
 
 ### Single run plot (mlp-only r=16 α=32)
-<p><img src="results/single_run_plots/alpaca-mlp-16-32.png" width="600"></p>
+<p><img src="results/single_run_plots/alpaca-mlp-8-32.png" width="600"></p>
 
 ## Reproduction
 

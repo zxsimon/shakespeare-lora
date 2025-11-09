@@ -4,7 +4,7 @@ play.py
 .DS_Store
 __pycache__/
 checkpoints/*
-!checkpoints/alpaca-mlp-16-32_1796
+!checkpoints/alpaca-mlp-8-32_1796
 requirements.txt
 /logs
 /logs copy
